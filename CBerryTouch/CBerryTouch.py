@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from _bcm2835 import *
+from libbcm2835. _bcm2835 import *
 import time
 
 class CBerryTouch():
@@ -245,7 +245,7 @@ class CBerryTouch():
    tc = 0x00, 0x00
    char_height = 15
    
-   if TOUCH_AVAILABLE == 1:   
+   if _TOUCH_AVAILABLE == 1:   
       # definition of filter   size
       _DEBOUNCE_BUFFER_SIZE = 4
       low_pass_x = [0]
@@ -665,7 +665,7 @@ class CBerryTouch():
       elif byte == 'low':
          return low
 
-   if TOUCH_AVAILABLE == 1:     
+   if _TOUCH_AVAILABLE == 1:     
    # get touch coordinates
       def RAIO_gettouch(self):
          mask= self.RAIO_GetRegister( self,self._INTC )
