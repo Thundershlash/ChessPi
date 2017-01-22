@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from libbcm2835. _bcm2835 import *
+from libbcm2835._bcm2835 import *
 import time
 
 class CBerryTouch():
