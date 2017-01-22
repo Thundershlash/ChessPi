@@ -19,8 +19,8 @@ from _bcm2835 import *
 import time
 
 class CBerryTouch():
-	_MOSI       = 10 # RPI_V2_GPIO_P1_19
-	_MISO       = 9  # RPI_V2_GPIO_P1_21
+   _MOSI       = 10 # RPI_V2_GPIO_P1_19
+   _MISO       = 9  # RPI_V2_GPIO_P1_21
    _SCLK       = 11 # RPI_V2_GPIO_P1_23
    _OE         = 17 # RPI_V2_GPIO_P1_11
    _SPI_CE1    = 7  # RPI_V2_GPIO_P1_26
@@ -31,7 +31,7 @@ class CBerryTouch():
    _RAIO_RD    = 23 # RPI_V2_GPIO_P1_16
    _RAIO_WAIT  = 22 # RPI_V2_GPIO_P1_15
    _RAIO_INT   = 27 # RPI_V2_GPIO_P1_13
-	
+   
    # touch 
    _TOUCH_AVAILABLE = 1
 
@@ -39,8 +39,8 @@ class CBerryTouch():
    _COLOR_MODE = 'CM_65K'
    
    if _COLOR_MODE == 'CM_4K':
-   	_BankNo_WR=0
-   	_BankNo_RD=1
+      _BankNo_WR=0
+      _BankNo_RD=1
 
    # TFT dimensions
    _DISPLAY_WIDTH = 320
@@ -239,66 +239,66 @@ class CBerryTouch():
    _BTE_MOVE_POSITIVE =  0x02
    _BTE_SOLID_FILL   =   0x0C
 
-	# enumeration of drawing modes
+   # enumeration of drawing modes
    _DRAW_MODES = {'CIRCLE_NONFILL','CIRCLE_FILL','SQUARE_NONFILL','SQUARE_FILL','LINE'}
-	
-	tc = 0x00, 0x00
-	char_height = 15
-	
-	if TOUCH_AVAILABLE == 1:	
-	   # definition of filter	size
-	   _DEBOUNCE_BUFFER_SIZE = 4
-	   low_pass_x = [0]
-	   low_pass_y = [0]
-		
- 	   # enumeration of touch modes 	
-	   _TOUCH_FUNCTIONS = {'down','pressed','up','no_touch'} 
-	   # declaration of touch structure
-	   class touch():
-			pass
+   
+   tc = 0x00, 0x00
+   char_height = 15
+   
+   if TOUCH_AVAILABLE == 1:   
+      # definition of filter   size
+      _DEBOUNCE_BUFFER_SIZE = 4
+      low_pass_x = [0]
+      low_pass_y = [0]
+      
+       # enumeration of touch modes    
+      _TOUCH_FUNCTIONS = {'down','pressed','up','no_touch'} 
+      # declaration of touch structure
+      class touch():
+         pass
 
-		my_touch = touch()
+      my_touch = touch()
    
    def __init__(self):
-		_COM_init_board()
-		_RAIO_init()
+      _COM_init_board()
+      _RAIO_init()
 
-	# Initialization of Communication between RasPi and CBerry
-	def _COM_init_board(self):
-		if not bcm2835_init():
+   # Initialization of Communication between RasPi and CBerry
+   def _COM_init_board(self):
+      if not bcm2835_init():
         return
-		
+      
    # set the pins to be an output and turn them on
-		bcm2835_gpio_fsel( self._OE, BCM2835_GPIO_FSEL_OUTP )
-		bcm2835_gpio_write( self._OE, HIGH )
-	
-	   bcm835_gpio_fsel( self._RAIO_RST, BCM2835_GPIO_FSEL_OUTP )
-	   bcm2835_gpio_write(self._RAIO_RST, HIGH )
+      bcm2835_gpio_fsel( self._OE, BCM2835_GPIO_FSEL_OUTP )
+      bcm2835_gpio_write( self._OE, HIGH )
+   
+      bcm835_gpio_fsel( self._RAIO_RST, BCM2835_GPIO_FSEL_OUTP )
+      bcm2835_gpio_write(self._RAIO_RST, HIGH )
 
- 	   bcm2835_gpio_fsel( self._RAIO_CS, BCM2835_GPIO_FSEL_OUTP )
-	   bcm2835_gpio_write( self._RAIO_CS, HIGH )
-		
-	   bcm2835_gpio_fsel( self._RAIO_RS, BCM2835_GPIO_FSEL_OUTP )
-	   bcm2835_gpio_write( self._RAIO_RS, HIGH )
+      bcm2835_gpio_fsel( self._RAIO_CS, BCM2835_GPIO_FSEL_OUTP )
+      bcm2835_gpio_write( self._RAIO_CS, HIGH )
+      
+      bcm2835_gpio_fsel( self._RAIO_RS, BCM2835_GPIO_FSEL_OUTP )
+      bcm2835_gpio_write( self._RAIO_RS, HIGH )
 
- 		bcm2835_gpio_fsel( self._RAIO_WR, BCM2835_GPIO_FSEL_OUTP )
+      bcm2835_gpio_fsel( self._RAIO_WR, BCM2835_GPIO_FSEL_OUTP )
       bcm2835_gpio_write( self._RAIO_WR, HIGH )
-	
-	   bcm2835_gpio_fsel( self._RAIO_RD, BCM2835_GPIO_FSEL_OUTP )
-	   bcm2835_gpio_write( self._RAIO_RD, HIGH )
+   
+      bcm2835_gpio_fsel( self._RAIO_RD, BCM2835_GPIO_FSEL_OUTP )
+      bcm2835_gpio_write( self._RAIO_RD, HIGH )
 
-	   # now the inputs
-	   bcm2835_gpio_fsel( self._RAIO_WAIT, BCM2835_GPIO_FSEL_INPT )
-	   bcm2835_gpio_set_pud( self._RAIO_WAIT, BCM2835_GPIO_PUD_UP)
-	
-	   bcm2835_gpio_fsel( self._RAIO_INT, BCM2835_GPIO_FSEL_INPT )
-	   bcm2835_gpio_set_pud( self._RAIO_INT, BCM2835_GPIO_PUD_UP)
-	
-	   # bcm2835_gpio_fsel( _MISO, BCM2835_GPIO_FSEL_INPT )
-	   # bcm2835_gpio_set_pud( _MISO, BCM2835_GPIO_PUD_UP)
-		
-	   # set pins for SPI
-	   # # bcm2835_gpio_fsel(MISO, BCM2835_GPIO_FSEL_ALT0); 
+      # now the inputs
+      bcm2835_gpio_fsel( self._RAIO_WAIT, BCM2835_GPIO_FSEL_INPT )
+      bcm2835_gpio_set_pud( self._RAIO_WAIT, BCM2835_GPIO_PUD_UP)
+   
+      bcm2835_gpio_fsel( self._RAIO_INT, BCM2835_GPIO_FSEL_INPT )
+      bcm2835_gpio_set_pud( self._RAIO_INT, BCM2835_GPIO_PUD_UP)
+   
+      # bcm2835_gpio_fsel( _MISO, BCM2835_GPIO_FSEL_INPT )
+      # bcm2835_gpio_set_pud( _MISO, BCM2835_GPIO_PUD_UP)
+      
+      # set pins for SPI
+      # # bcm2835_gpio_fsel(MISO, BCM2835_GPIO_FSEL_ALT0); 
       # bcm2835_gpio_fsel(MOSI, BCM2835_GPIO_FSEL_ALT0)
       # bcm2835_gpio_fsel(SCLK, BCM2835_GPIO_FSEL_ALT0)
       # bcm2835_gpio_fsel(SPI_CE1, BCM2835_GPIO_FSEL_ALT0)
@@ -310,7 +310,7 @@ class CBerryTouch():
       # clear TX and RX fifos
       # bcm2835_peri_write_nb( paddr, BCM2835_SPI0_CS_CLEAR )
       bcm2835_spi_begin() 
-	   bcm2835_spi_setBitOrder( BCM2835_SPI_BIT_ORDER_MSBFIRST )      
+      bcm2835_spi_setBitOrder( BCM2835_SPI_BIT_ORDER_MSBFIRST )      
       bcm2835_spi_setDataMode( BCM2835_SPI_MODE0 )                 
       bcm2835_spi_setClockDivider( BCM2835_SPI_CLOCK_DIVIDER_2 ) 
       bcm2835_spi_chipSelect( BCM2835_SPI_CS1 )                      
@@ -321,50 +321,50 @@ class CBerryTouch():
    def hard_reset(self):
       bcm2835_gpio_write( self._RAIO_RST, LOW )
       bcm2835_DelayMicroseconds( 10000 )
- 	   bcm2835_gpio_write( self._RAIO_RST, HIGH )
- 	   bcm2835_DelayMicroseconds( 1000 )
- 	   
+      bcm2835_gpio_write( self._RAIO_RST, HIGH )
+      bcm2835_DelayMicroseconds( 1000 )
+       
    # wait during raio is busy
    def _wait_for_raio(self):
-	   while bcm2835_gpio_lev( self.RAIO_WAIT ) == 0: 
-	      pass
-	      
+      while bcm2835_gpio_lev( self.RAIO_WAIT ) == 0: 
+         pass
+         
    # write data via SPI to tft
    def _SPI_data_out( data ):
-		tbuf[0] = hex(data)
-		rbuf[0] = 0
-	   bcm2835_spi_transfernb( id(tbuf[0]), id(rbuf[0]), 1 ) 
-	   return rbuf[0] 	
+      tbuf[0] = hex(data)
+      rbuf[0] = 0
+      bcm2835_spi_transfernb( id(tbuf[0]), id(rbuf[0]), 1 ) 
+      return rbuf[0]    
 
    # write byte to register
    def _RegWrite( self,reg ):
-	   bcm2835_gpio_write( self._RAIO_RS, HIGH )               
-	   bcm2835_gpio_write( self._RAIO_CS, LOW ) 
+      bcm2835_gpio_write( self._RAIO_RS, HIGH )               
+      bcm2835_gpio_write( self._RAIO_CS, LOW ) 
       bcm2835_gpio_write( self._RAIO_WR, LOW ) 
       bcm2835_gpio_write( self._OE, LOW )
        
       self._SPI_data_out( reg )
     
       bcm2835_gpio_write( self._RAIO_WR, HIGH )
- 	   bcm2835_gpio_write( self._RAIO_CS, HIGH ) 
-	   bcm2835_gpio_write( self._OE, HIGH )
+      bcm2835_gpio_write( self._RAIO_CS, HIGH ) 
+      bcm2835_gpio_write( self._OE, HIGH )
 
    # write byte to tft
    def _DataWrite( self,data ): 
-	   bcm2835_gpio_write( self._RAIO_RS, LOW ) 
-	   bcm2835_gpio_write( self._RAIO_CS, LOW ) 
+      bcm2835_gpio_write( self._RAIO_RS, LOW ) 
+      bcm2835_gpio_write( self._RAIO_CS, LOW ) 
       bcm2835_gpio_write( self._RAIO_WR, LOW ) 
       bcm2835_gpio_write( self._OE, LOW )
     
       self._SPI_data_out( data )
         
       bcm2835_gpio_write( self._RAIO_WR, HIGH )
-	   bcm2835_gpio_write( self._RAIO_CS, HIGH ) 
-	   bcm2835_gpio_write( self._OE, HIGH )
-	   
-	def _DataRead(self):
-	   bcm2835_gpio_write( self._RAIO_RS, LOW ) 
-	   bcm2835_gpio_write( self._RAIO_CS, LOW ) 
+      bcm2835_gpio_write( self._RAIO_CS, HIGH ) 
+      bcm2835_gpio_write( self._OE, HIGH )
+      
+   def _DataRead(self):
+      bcm2835_gpio_write( self._RAIO_RS, LOW ) 
+      bcm2835_gpio_write( self._RAIO_CS, LOW ) 
       bcm2835_gpio_write( self._RAIO_WR, HIGH )
       bcm2835_gpio_write( self._RAIO_RD, LOW )
       bcm2835_gpio_write( self._OE, LOW )
@@ -372,56 +372,56 @@ class CBerryTouch():
       data = self._SPI_data_out( '0x00' )
         
       bcm2835_gpio_write( self._RAIO_WR, HIGH )
-	   bcm2835_gpio_write( self._RAIO_CS, HIGH ) 
-	   bcm2835_gpio_write( self._RAIO_RD, HIGH )
-	   bcm2835_gpio_write( self._OE, HIGH )
-		return data
-		
-		
+      bcm2835_gpio_write( self._RAIO_CS, HIGH ) 
+      bcm2835_gpio_write( self._RAIO_RD, HIGH )
+      bcm2835_gpio_write( self._OE, HIGH )
+      return data
+      
+      
    # Initialization of RAIO8870
-	def _RAIO_init(self):
-		PLL_Initial_Flag = 0
- 	
-	   # PLL settings (System Clock)  
-	
-	   if PLL_Initial_Flag == 0:  			# wait until PLL is ready
-		   PLL_Initial_Flag = 1                # set Flag to avoid repeated PLL init
-		
-		   self.RAIO_SetRegister( self,self._PLLC1, 0x07 )     # set sys_clk 
-		   bcm2835_DelayMicroseconds( 200 )
-		   self.RAIO_SetRegister( self,self._PLLC2, 0x03 )     # set sys_clk 
-		   bcm2835_delayMicroseconds( 200 )
-		
-		   self.RAIO_SetRegister( self,self._PWRR, 0x01 )     # Raio software reset ( bit 0 ) set
-		   self.RAIO_SetRegister( self,self._PWRR, 0x00 )     # Raio software reset ( bit 0 ) set to 0
-		   time.sleep(.100) 
+   def _RAIO_init(self):
+      PLL_Initial_Flag = 0
+    
+      # PLL settings (System Clock)  
+   
+      if PLL_Initial_Flag == 0:           # wait until PLL is ready
+         PLL_Initial_Flag = 1                # set Flag to avoid repeated PLL init
+      
+         self.RAIO_SetRegister( self,self._PLLC1, 0x07 )     # set sys_clk 
+         bcm2835_DelayMicroseconds( 200 )
+         self.RAIO_SetRegister( self,self._PLLC2, 0x03 )     # set sys_clk 
+         bcm2835_delayMicroseconds( 200 )
+      
+         self.RAIO_SetRegister( self,self._PWRR, 0x01 )     # Raio software reset ( bit 0 ) set
+         self.RAIO_SetRegister( self,self._PWRR, 0x00 )     # Raio software reset ( bit 0 ) set to 0
+         time.sleep(.100) 
 
 
-	   # color modes (color depths)  
-	
-		   if self._COLOR_MODE == 'CM_65K': 
-			# System Configuration Register
-			   self.RAIO_SetRegister( self,self._SYSR, 0x0A )    # digital TFT
-											           # parallel data out
-											           # no external memory
-											           # 8bit memory data bus
-											           # 16bpp 65K color
-											           # 16bit MCU-interface (data)
-			   self.RAIO_SetRegister( self,self._DPCR, 0x00 )    # one layer	
-		   elif _COLOR_MODE == 'CM_4K':
-			   # System Configuration Register
-			   self.RAIO_SetRegister( self,self._SYSR, 0x06 )    # digital TFT
-											           # parallel data out
-											           # no external memory
-											           # 8bit memory data bus
-											           # 12bpp 4K color
-											           # 16bit MCU-interface (data)
-			   self.RAIO_SetRegister( self,self._DPCR, 0x80 )    # two layers	
-			   self.RAIO_SetRegister( self,self._MWCR1, self.BankNo_WR )
-			   self.RAIO_SetRegister( self,self._LTPR0, self.BankNo_RD )							 
+      # color modes (color depths)  
+   
+         if self._COLOR_MODE == 'CM_65K': 
+         # System Configuration Register
+            self.RAIO_SetRegister( self,self._SYSR, 0x0A )    # digital TFT
+                                            # parallel data out
+                                            # no external memory
+                                            # 8bit memory data bus
+                                            # 16bpp 65K color
+                                            # 16bit MCU-interface (data)
+            self.RAIO_SetRegister( self,self._DPCR, 0x00 )    # one layer   
+         elif _COLOR_MODE == 'CM_4K':
+            # System Configuration Register
+            self.RAIO_SetRegister( self,self._SYSR, 0x06 )    # digital TFT
+                                            # parallel data out
+                                            # no external memory
+                                            # 8bit memory data bus
+                                            # 12bpp 4K color
+                                            # 16bit MCU-interface (data)
+            self.RAIO_SetRegister( self,self._DPCR, 0x80 )    # two layers   
+            self.RAIO_SetRegister( self,self._MWCR1, self.BankNo_WR )
+            self.RAIO_SetRegister( self,self._LTPR0, self.BankNo_RD )                      
  
-	   # horizontal settings
-	   # 0x27+1 * 8 = 320 pixel  
+      # horizontal settings
+      # 0x27+1 * 8 = 320 pixel  
       self.RAIO_SetRegister( self,self._HDWR , (self._DISPLAY_WIDTH / 8) - 1 )
       # Horizontal Non-Display Period Fine Tuning   
       self.RAIO_SetRegister( self,self._HNDFTR, 0x02 )
@@ -454,7 +454,7 @@ class CBerryTouch():
       # VPWR , VSYNC Polarity ,VSYNC Pulse Width[6:0]
       # VSYNC , Pulse Width(PCLK) = (VPWR + 1) 
       self.RAIO_SetRegister( self,self._VPWR, 0x00 )
-		
+      
       # miscellaneous settings 
     
       # active Window
@@ -463,55 +463,55 @@ class CBerryTouch():
       # PCLK fetch data on rising edge 
       self.RAIO_SetRegister(self, self._PCLK, 0x00 )   
 
-	   # Backlight dimming       
-	   self.RAIO_SetBacklightPWMValue(self,50)
+      # Backlight dimming       
+      self.RAIO_SetBacklightPWMValue(self,50)
 
-	   # memory clear with background color
-	   self.Text_Background_Color( self,self._COLOR_WHITE )                
+      # memory clear with background color
+      self.Text_Background_Color( self,self._COLOR_WHITE )                
       self.RAIO_SetRegister( self,self._MCLR, 0x81 )     
       self.TFT_wait_for_raio(self) 
   
       self.RAIO_SetRegister( self,self._IODR, 0x07 )    
       self.RAIO_SetRegister( self,self._PWRR, 0x80 )
    
-		if self._TOUCH_AVAILABLE == 1:
-		   # Touch Panel enable
-	      # wait 4096 system clocks period
-	      # ADC clock = system clock / 16
-	      self.RAIO_SetRegister( self,self._TPCR0, 0xB7 )	
-	      # 4wire, auto mode, internal vref enabled
-	      # debounce enabled, idle mode
-	      self.RAIO_SetRegister( self,self._TPCR1, 0x84 )
-	
-	      # enable touch interrupt
-	      self.RAIO_SetRegister( self,self._INTC, 0x40 ) 
+      if self._TOUCH_AVAILABLE == 1:
+         # Touch Panel enable
+         # wait 4096 system clocks period
+         # ADC clock = system clock / 16
+         self.RAIO_SetRegister( self,self._TPCR0, 0xB7 )   
+         # 4wire, auto mode, internal vref enabled
+         # debounce enabled, idle mode
+         self.RAIO_SetRegister( self,self._TPCR1, 0x84 )
+   
+         # enable touch interrupt
+         self.RAIO_SetRegister( self,self._INTC, 0x40 ) 
 
-			################### hier gehts weiter
-	      # init touch structure
-	      self.my_touch.state = no_touch
-	
-	      # init touch values
-			self.touch_buffer_full = 0
-			self.low_pass_pointer = 0		 
+         ################### hier gehts weiter
+         # init touch structure
+         self.my_touch.state = no_touch
+   
+         # init touch values
+         self.touch_buffer_full = 0
+         self.low_pass_pointer = 0       
 
-			
-	# Read data from a register
+         
+   # Read data from a register
    def RAIO_GetRegister(self,reg):
       self._RegWrite(self,reg)
       value = ReadData(self)
       return value
 
-	# write command to a register
-	def RAIO_SetRegister( self,reg, value ):
-	   _RegWrite(self,reg)
-	   _DataWrite(self,value)
+   # write command to a register
+   def RAIO_SetRegister( self,reg, value ):
+      _RegWrite(self,reg)
+      _DataWrite(self,value)
 
    # set PWM value for backlight -> 0 (0% PWM) - 255 (100% PWM)
-	def RAIO_SetBacklightPWMValue( self,BL_value ):
-	   # Enable PWM1 output devider 256  
-	   self.RAIO_SetRegister(self, self._P1CR, 0x88) 
-	   # BL_vaue = 0 (0% PWM) - 255 (100% PWM)
-	   self.RAIO_SetRegister(self, self._P1DCR, BL_value )
+   def RAIO_SetBacklightPWMValue( self,BL_value ):
+      # Enable PWM1 output devider 256  
+      self.RAIO_SetRegister(self, self._P1CR, 0x88) 
+      # BL_vaue = 0 (0% PWM) - 255 (100% PWM)
+      self.RAIO_SetRegister(self, self._P1DCR, BL_value )
 
    # set coordinates for active window
    # p1, p2: tupel(x,y)
@@ -519,87 +519,87 @@ class CBerryTouch():
       # Set p1
       self.RAIO_SetRegister( self,self._HSAW0, i16_split(p1[0],low) )
       self.RAIO_SetRegister( self,self._HSAW1, i16_split(p1[0],high) )
-	   self.RAIO_SetRegister( self,self._VEAW0, i16_split(p1[1],low) )
+      self.RAIO_SetRegister( self,self._VEAW0, i16_split(p1[1],low) )
       self.RAIO_SetRegister( self,self._VEAW1, i16_split(p1[1],high) )
       
       # Set p2
       self.RAIO_SetRegister( self,self._HEAW0, i16_split(p2[0],low) )
       self.RAIO_SetRegister( self,self._HEAW1, i16_split(p2[0],high) )
-	   self.RAIO_SetRegister( self,self._VSAW0, i16_split(p2[1],low) )
+      self.RAIO_SetRegister( self,self._VSAW0, i16_split(p2[1],low) )
       self.RAIO_SetRegister( self,self._VSAW1, i16_split(p2[1],high) )
       
 
-	# set cursor 
-	# cur: tupel(x,y)
+   # set cursor 
+   # cur: tupel(x,y)
    def RAIO_set_cursor( self,cur ):
       self.RAIO_SetRegister( self,self._CURH0, i16_split(cur[0],low) )
-	   self.RAIO_SetRegister( self,self._CURH1, i16_split(cur[0],high) )
-	
-	   self.RAIO_SetRegister( self,self._CURV0, i16_split(cur[1],low) )
-	   self.RAIO_SetRegister( self,self._CURV1, i16_split(cur[1],high) )
-	   
+      self.RAIO_SetRegister( self,self._CURH1, i16_split(cur[0],high) )
+   
+      self.RAIO_SetRegister( self,self._CURV0, i16_split(cur[1],low) )
+      self.RAIO_SetRegister( self,self._CURV1, i16_split(cur[1],high) )
+      
 
    # set mode for BET (Block Transfer Engine)
    def BTE_mode( self,bte_operation, rop_function ):
       self.RAIO_SetRegister(self,self._BECR1, bte_operation | (rop_function<<4))
 
    # set color -> see color defines
-	def Text_Background_Color( self,color ):
-	   self.RAIO_SetRegister( self,self._TBCR, color )
-		
-		
+   def Text_Background_Color( self,color ):
+      self.RAIO_SetRegister( self,self._TBCR, color )
+      
+      
    def Text_Foreground_Color( color ):
-		self.RAIO_SetRegister( self,self._TFCR, color)
+      self.RAIO_SetRegister( self,self._TFCR, color)
 
 
    # clear memory
    def RAIO_clear_screen():
       self.RAIO_SetRegister( self,self._MCLR , 0x81 ) 
-	   self._wait_for_raio(self)
+      self._wait_for_raio(self)
 
 
-	# set coordinates for drawing
-	# p1, p2: Tupel(x,y)
+   # set coordinates for drawing
+   # p1, p2: Tupel(x,y)
    def Set_Geometric_Coordinate(self, p1, p2 ):
       # P1, x
-	   self.RAIO_SetRegister( self,self._DLHSR0, i16_split(p1[0],low) )
-	   self.RAIO_SetRegister( self,self._DLHSR1, i16_split(p1[0],high) )
+      self.RAIO_SetRegister( self,self._DLHSR0, i16_split(p1[0],low) )
+      self.RAIO_SetRegister( self,self._DLHSR1, i16_split(p1[0],high) )
       # P1, y
-	   self.RAIO_SetRegister( self,self._DLVSR0, i16_split(p1[1],low)  )
-	   self.RAIO_SetRegister( self,self._DLVSR1, i16_split(p1[1],high) )
+      self.RAIO_SetRegister( self,self._DLVSR0, i16_split(p1[1],low)  )
+      self.RAIO_SetRegister( self,self._DLVSR1, i16_split(p1[1],high) )
 
-	   # P2, x
-	   self.RAIO_SetRegister( self,self._DLHER0, i16_split(p2[0],low) )
-	   self.RAIO_SetRegister( self,self._DLHER1, i16_split(p2[0],high) )
+      # P2, x
+      self.RAIO_SetRegister( self,self._DLHER0, i16_split(p2[0],low) )
+      self.RAIO_SetRegister( self,self._DLHER1, i16_split(p2[0],high) )
 
-	   # P2, y
-	   self.RAIO_SetRegister( self,self._DLVER0, i16_split(p2[1],low) )
-	   self.RAIO_SetRegister( self,self._DLVER1, i16_split(p2[1],high) )
+      # P2, y
+      self.RAIO_SetRegister( self,self._DLVER0, i16_split(p2[1],low) )
+      self.RAIO_SetRegister( self,self._DLVER1, i16_split(p2[1],high) )
 
-	def Set_Geometric_Coordinate_circle ( p1, rad ):
-	   # P1, x
-	   self.RAIO_SetRegister( self,self._DCHR0, i16_split(p1[0],low) )
-   	self.RAIO_SetRegister( self,self._DCHR1, i16_split(p1[0],high) )
-	
-	   # P1, y
-	   self.RAIO_SetRegister( self,self._DCVR0, i16_split(p1[1],low) )
-	   self.RAIO_SetRegister( self,self._DCVR1, i16_split(p1[1],high) )
-		
-		# rad
-	   self.RAIO_SetRegister( self,self._DCRR, rad )
+   def Set_Geometric_Coordinate_circle ( p1, rad ):
+      # P1, x
+      self.RAIO_SetRegister( self,self._DCHR0, i16_split(p1[0],low) )
+      self.RAIO_SetRegister( self,self._DCHR1, i16_split(p1[0],high) )
+   
+      # P1, y
+      self.RAIO_SetRegister( self,self._DCVR0, i16_split(p1[1],low) )
+      self.RAIO_SetRegister( self,self._DCVR1, i16_split(p1[1],high) )
+      
+      # rad
+      self.RAIO_SetRegister( self,self._DCRR, rad )
 
-	# show the BMP picture on the TFT screen 
+   # show the BMP picture on the TFT screen 
    def RAIO_Write_Picture( self,data, count ): # has to be checked how pointer works in python
-		pass
+      pass
 
 
-	# set draw mode -> see DRAW_MODES
-	def RAIO_StartDrawing(self,whattodraw ):
-	   if whattodraw == 'CIRCLE_NONFILL':
-	   	 self.RAIO_SetRegister( self,self._DCR,  0x40 )
-	   elif whattodraw == 'CIRCLE_FILL':
-	       self.RAIO_SetRegister( self,self._DCR,  0x60 )
-	   elif whattodraw == 'SQUARE_NONFILL':
+   # set draw mode -> see DRAW_MODES
+   def RAIO_StartDrawing(self,whattodraw ):
+      if whattodraw == 'CIRCLE_NONFILL':
+          self.RAIO_SetRegister( self,self._DCR,  0x40 )
+      elif whattodraw == 'CIRCLE_FILL':
+          self.RAIO_SetRegister( self,self._DCR,  0x60 )
+      elif whattodraw == 'SQUARE_NONFILL':
           self.RAIO_SetRegister( self,self._DCR,  0x90 )
       elif whattodraw == 'SQUARE_FILL':
           self.RAIO_SetRegister( self,self._DCR,  0xB0 )
@@ -609,110 +609,110 @@ class CBerryTouch():
    # draw some basic geometrical forms
    def Draw_Line( self,p1, p2 ):
       self.Set_Geometric_Coordinate( self,p1, p2 )
-	   self.RAIO_StartDrawing( self,'LINE' )
+      self.RAIO_StartDrawing( self,'LINE' )
 
-	def Draw_Square(self, p1, p2 ):
-	   self.Set_Geometric_Coordinate( self,p1, p22 )
-	   self.RAIO_StartDrawing(self, 'SQUARE_NONFILL' )
-	
-	def Draw_Circle( self,p1, rad ):
-	   self.Set_Geometric_Coordinate_circle (self, p1, rad )
-	   self.RAIO_StartDrawing( self,'CIRCLE_NONFILL' )
+   def Draw_Square(self, p1, p2 ):
+      self.Set_Geometric_Coordinate( self,p1, p22 )
+      self.RAIO_StartDrawing(self, 'SQUARE_NONFILL' )
+   
+   def Draw_Circle( self,p1, rad ):
+      self.Set_Geometric_Coordinate_circle (self, p1, rad )
+      self.RAIO_StartDrawing( self,'CIRCLE_NONFILL' )
 
    # print text
    def RAIO_print_text(self,p1, text, BG_color, FG_color ):
-		# set cursor
-	   self.RAIO_set_cursor( self,p1 )
-	
-	   # set color 
-	   self.Text_Background_Color(self, BG_color )
-	   self.Text_Foreground_Color(self, FG_color )
-	
-	   # set text mode
-	   self.RAIO_SetRegister( self,self._MWCR0, 0x80 )
-	
-	   # write text to display
-	   self._RegWrite( self,self._MRWC )
-	
-	   for i in xrange(0,len(text)-1):
-	      self._DataWrite( self,text[i] )
-		   self._wait_for_raio(self)
-	
-	   self._wait_for_raio(self)
-	   	
-	   # set graphic mode
-	   self.RAIO_SetRegister( self,self._MWCR0, 0x00 )
+      # set cursor
+      self.RAIO_set_cursor( self,p1 )
+   
+      # set color 
+      self.Text_Background_Color(self, BG_color )
+      self.Text_Foreground_Color(self, FG_color )
+   
+      # set text mode
+      self.RAIO_SetRegister( self,self._MWCR0, 0x80 )
+   
+      # write text to display
+      self._RegWrite( self,self._MRWC )
+   
+      for i in xrange(0,len(text)-1):
+         self._DataWrite( self,text[i] )
+         self._wait_for_raio(self)
+   
+      self._wait_for_raio(self)
+         
+      # set graphic mode
+      self.RAIO_SetRegister( self,self._MWCR0, 0x00 )
 
 
    # set font size
    def RAIO_SetFontSizeFactor(self, size ):
       size = (size & 0x0f)
-	   self.RAIO_SetRegister ( self,self._FNCR1, size )
-		
+      self.RAIO_SetRegister ( self,self._FNCR1, size )
+      
    def i16_split(value, byte):
-   	if value > 4095: 
-   		high = int(hex(value)[:4],16)
-   		low = int('0x'+hex(value)[4:],16)
-   	elif value > 255:
-   		high = int('0x0'+hex(value)[2:3],16)
-   		low = int('0x'+hex(value)[3:],16)
-   	elif value <= 255:
-   	   high = 0x00
-   	   low = value
-   	   
-   	if byte == 'high':
-   		return high
+      if value > 4095: 
+         high = int(hex(value)[:4],16)
+         low = int('0x'+hex(value)[4:],16)
+      elif value > 255:
+         high = int('0x0'+hex(value)[2:3],16)
+         low = int('0x'+hex(value)[3:],16)
+      elif value <= 255:
+         high = 0x00
+         low = value
+         
+      if byte == 'high':
+         return high
       elif byte == 'low':
          return low
 
    if TOUCH_AVAILABLE == 1:     
    # get touch coordinates
       def RAIO_gettouch(self):
-	      mask= self.RAIO_GetRegister( self,self._INTC )
-	      touch = 0,0
-	
-	      if mask & 0x04:
-		      # read the data for x and y
-		      touch[0] = self.RAIO_GetRegister ( self,self._TPXH )
-		      touch[1] = self.RAIO_GetRegister ( self,self._TPYH )
-		
-		      # fill low pass filter with the new values
-		      low_pass_x.append(touch[0])
-		      low_pass_y.append(touch[1])
-		      low_pass_pointer = low_pass_pointer + 1
-		
-		      if low_pass_pointer == self._DEBOUNCE_BUFFER_SIZE:
-		         low_pass_pointer = 0
-			      touch_buffer_full = 1
-		         
-		
-		      # calculate the average
-		      my_touch.touch[0] = (low_pass_x[0] + low_pass_x[1] + low_pass_x[2] + low_pass_x[3] ) >> 2
-		      my_touch.touch[1] = (low_pass_y[0] + low_pass_y[1] + low_pass_y[2] + low_pass_y[3] ) >> 2
+         mask= self.RAIO_GetRegister( self,self._INTC )
+         touch = 0,0
+   
+         if mask & 0x04:
+            # read the data for x and y
+            touch[0] = self.RAIO_GetRegister ( self,self._TPXH )
+            touch[1] = self.RAIO_GetRegister ( self,self._TPYH )
+      
+            # fill low pass filter with the new values
+            low_pass_x.append(touch[0])
+            low_pass_y.append(touch[1])
+            low_pass_pointer = low_pass_pointer + 1
+      
+            if low_pass_pointer == self._DEBOUNCE_BUFFER_SIZE:
+               low_pass_pointer = 0
+               touch_buffer_full = 1
+               
+      
+            # calculate the average
+            my_touch.touch[0] = (low_pass_x[0] + low_pass_x[1] + low_pass_x[2] + low_pass_x[3] ) >> 2
+            my_touch.touch[1] = (low_pass_y[0] + low_pass_y[1] + low_pass_y[2] + low_pass_y[3] ) >> 2
 
-		
-		      if (touch_buffer_full == 1):
-		         if my_touch.state == 'down':
-			         my_touch.state= 'pressed'
-					elif my_touch.state == 'no_touch':
-				      my_touch.state = 'down'
-					else:
-					   pass
-		
-		      # clear touch irq
-		      mask = mask & 0xf4
-		      self.RAIO_SetRegister( self,self._INTC, mask ) 
-	
-		      return  1
-	          
-	      else:
-	         if my_touch.state == 'up':
-	            my_touch.state = 'no_touch'
-			   elif  my_touch.state == 'pressed':
-			      my_touch.state = 'up'
-				else:
-				   pass
-		
-		      low_pass_pointer = 0
-		      touch_buffer_full = 0
-		      return 0 	
+      
+            if (touch_buffer_full == 1):
+               if my_touch.state == 'down':
+                  my_touch.state= 'pressed'
+               elif my_touch.state == 'no_touch':
+                  my_touch.state = 'down'
+               else:
+                  pass
+      
+            # clear touch irq
+            mask = mask & 0xf4
+            self.RAIO_SetRegister( self,self._INTC, mask ) 
+   
+            return  1
+             
+         else:
+            if my_touch.state == 'up':
+               my_touch.state = 'no_touch'
+            elif  my_touch.state == 'pressed':
+               my_touch.state = 'up'
+            else:
+               pass
+      
+            low_pass_pointer = 0
+            touch_buffer_full = 0
+            return 0    
