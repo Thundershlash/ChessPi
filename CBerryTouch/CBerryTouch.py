@@ -1,19 +1,6 @@
-# -*- Mode: Python; indent-tabs-mode: t; c-basic-offset: 3; tab-width: 3 -*- #
-# raio8870.py
+# CBerryTopuch.py
 # Copyright (C) 2017 Daniel Marquardt <thundershlash@gmx.net>
-#
-# c_berry_touch is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# c_berry_touch is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along
-# with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 from libbcm2835._bcm2835 import *
 import time
@@ -248,8 +235,10 @@ class CBerryTouch():
    if _TOUCH_AVAILABLE == 1:   
       # definition of filter   size
       _DEBOUNCE_BUFFER_SIZE = 4
-      low_pass_x = [0]
-      low_pass_y = [0]
+      _low_pass_x = [0]
+      _low_pass_y = [0]
+      _low_pass_pointer = 0
+      _touch_buffer_full
       
        # enumeration of touch modes    
       _TOUCH_FUNCTIONS = {'down','pressed','up','no_touch'} 
@@ -326,7 +315,7 @@ class CBerryTouch():
        
    # wait during raio is busy
    def _wait_for_raio(self):
-      while bcm2835_gpio_lev( self.RAIO_WAIT ) == 0: 
+      while bcm2835_gpio_lev( self._RAIO_WAIT ) == 0: 
          pass
          
    # write data via SPI to tft
@@ -392,8 +381,8 @@ class CBerryTouch():
          self.RAIO_SetRegister( self._PLLC2, 0x03 )     # set sys_clk 
          bcm2835_delayMicroseconds( 200 )
       
-         self.RAIO_SetRegister( self,self._PWRR, 0x01 )     # Raio software reset ( bit 0 ) set
-         self.RAIO_SetRegister( self,self._PWRR, 0x00 )     # Raio software reset ( bit 0 ) set to 0
+         self.RAIO_SetRegister( self._PWRR, 0x01 )     # Raio software reset ( bit 0 ) set
+         self.RAIO_SetRegister( self._PWRR, 0x00 )     # Raio software reset ( bit 0 ) set to 0
          time.sleep(.100) 
 
 
@@ -401,90 +390,90 @@ class CBerryTouch():
    
          if self._COLOR_MODE == 'CM_65K': 
          # System Configuration Register
-            self.RAIO_SetRegister( self,self._SYSR, 0x0A )    # digital TFT
+            self.RAIO_SetRegister( self._SYSR, 0x0A )    # digital TFT
                                             # parallel data out
                                             # no external memory
                                             # 8bit memory data bus
                                             # 16bpp 65K color
                                             # 16bit MCU-interface (data)
-            self.RAIO_SetRegister( self,self._DPCR, 0x00 )    # one layer   
+            self.RAIO_SetRegister( self._DPCR, 0x00 )    # one layer   
          elif _COLOR_MODE == 'CM_4K':
             # System Configuration Register
-            self.RAIO_SetRegister( self,self._SYSR, 0x06 )    # digital TFT
+            self.RAIO_SetRegister( self._SYSR, 0x06 )    # digital TFT
                                             # parallel data out
                                             # no external memory
                                             # 8bit memory data bus
                                             # 12bpp 4K color
                                             # 16bit MCU-interface (data)
-            self.RAIO_SetRegister( self,self._DPCR, 0x80 )    # two layers   
-            self.RAIO_SetRegister( self,self._MWCR1, self.BankNo_WR )
-            self.RAIO_SetRegister( self,self._LTPR0, self.BankNo_RD )                      
+            self.RAIO_SetRegister( self._DPCR, 0x80 )    # two layers   
+            self.RAIO_SetRegister( self._MWCR1, self.BankNo_WR )
+            self.RAIO_SetRegister( self._LTPR0, self.BankNo_RD )                      
  
       # horizontal settings
       # 0x27+1 * 8 = 320 pixel  
-      self.RAIO_SetRegister( self,self._HDWR , (self._DISPLAY_WIDTH / 8) - 1 )
+      self.RAIO_SetRegister( self._HDWR , (self._DISPLAY_WIDTH / 8) - 1 )
       # Horizontal Non-Display Period Fine Tuning   
-      self.RAIO_SetRegister( self,self._HNDFTR, 0x02 )
+      self.RAIO_SetRegister( self._HNDFTR, 0x02 )
     
       # HNDR , Horizontal Non-Display Period Bit[4:0] 
       # Horizontal Non-Display Period (pixels) = (HNDR + 1)*8    
-      self.RAIO_SetRegister( self,self._HNDR, 0x03 )
+      self.RAIO_SetRegister( self._HNDR, 0x03 )
       # HSTR , HSYNC Start Position[4:0], HSYNC Start Position(PCLK) = (HSTR + 1)*8     0x02    
-      self.RAIO_SetRegister( self,self._HSTR, 0x04 )                                 
+      self.RAIO_SetRegister( self._HSTR, 0x04 )                                 
 
       # HPWR , HSYNC Polarity ,The period width of HSYNC. 
       # 1xxxxxxx activ high 0xxxxxxx activ low
       # HSYNC Width [4:0] HSYNC Pulse width
       # (PCLK) = (HPWR + 1)*8
-      self.RAIO_SetRegister( self,self._HPWR, 0x03 )
+      self.RAIO_SetRegister( self._HPWR, 0x03 )
     
     
       # vertical settings    
       # 0x0EF +1 = 240 pixel
-      self.RAIO_SetRegister( self,self._VDHR0 , ( (self._DISPLAY_HEIGHT-1) & 0xFF ) ) 
-      self.RAIO_SetRegister(  self,self._VDHR1 , ( (self._DISPLAY_HEIGHT-1) >> 8)    )
+      self.RAIO_SetRegister( self._VDHR0 , ( (self._DISPLAY_HEIGHT-1) & 0xFF ) ) 
+      self.RAIO_SetRegister( self._VDHR1 , ( (self._DISPLAY_HEIGHT-1) >> 8)    )
     
       # VNDR0 , Vertical Non-Display Period Bit [7:0]
       # Vertical Non-Display area = (VNDR + 1)
       # VNDR1 , Vertical Non-Display Period Bit [8]
       # Vertical Non-Display area = (VNDR + 1)              
-      self.RAIO_SetRegister( self,self._VNDR0, 0x10 )
-      self.RAIO_SetRegister( self,self._VNDR1, 0x00 )
+      self.RAIO_SetRegister( self._VNDR0, 0x10 )
+      self.RAIO_SetRegister( self._VNDR1, 0x00 )
                       
       # VPWR , VSYNC Polarity ,VSYNC Pulse Width[6:0]
       # VSYNC , Pulse Width(PCLK) = (VPWR + 1) 
-      self.RAIO_SetRegister( self,self._VPWR, 0x00 )
+      self.RAIO_SetRegister( self._VPWR, 0x00 )
       
       # miscellaneous settings 
     
       # active Window
-      self.Active_Window(self, 0, self._DISPLAY_WIDTH-1, 0, self._DISPLAY_HEIGHT-1 )     
+      self.Active_Window( 0, self._DISPLAY_WIDTH-1, 0, self._DISPLAY_HEIGHT-1 )     
         
       # PCLK fetch data on rising edge 
-      self.RAIO_SetRegister(self, self._PCLK, 0x00 )   
+      self.RAIO_SetRegister( self._PCLK, 0x00 )   
 
       # Backlight dimming       
-      self.RAIO_SetBacklightPWMValue(self,50)
+      self.RAIO_SetBacklightPWMValue(50)
 
       # memory clear with background color
-      self.Text_Background_Color( self,self._COLOR_WHITE )                
-      self.RAIO_SetRegister( self,self._MCLR, 0x81 )     
-      self.TFT_wait_for_raio(self) 
+      self.Text_Background_Color( self._COLOR_WHITE )                
+      self.RAIO_SetRegister( self._MCLR, 0x81 )     
+      self.TFT_wait_for_raio() 
   
-      self.RAIO_SetRegister( self,self._IODR, 0x07 )    
-      self.RAIO_SetRegister( self,self._PWRR, 0x80 )
+      self.RAIO_SetRegister( self._IODR, 0x07 )    
+      self.RAIO_SetRegister( self._PWRR, 0x80 )
    
       if self._TOUCH_AVAILABLE == 1:
          # Touch Panel enable
          # wait 4096 system clocks period
          # ADC clock = system clock / 16
-         self.RAIO_SetRegister( self,self._TPCR0, 0xB7 )   
+         self.RAIO_SetRegister( self._TPCR0, 0xB7 )   
          # 4wire, auto mode, internal vref enabled
          # debounce enabled, idle mode
-         self.RAIO_SetRegister( self,self._TPCR1, 0x84 )
+         self.RAIO_SetRegister( self._TPCR1, 0x84 )
    
          # enable touch interrupt
-         self.RAIO_SetRegister( self,self._INTC, 0x40 ) 
+         self.RAIO_SetRegister( self._INTC, 0x40 ) 
 
          ################### hier gehts weiter
          # init touch structure
@@ -497,8 +486,8 @@ class CBerryTouch():
          
    # Read data from a register
    def RAIO_GetRegister(self,reg):
-      self._RegWrite(self,reg)
-      value = ReadData(self)
+      self._RegWrite(reg)
+      value = _DataRead()
       return value
 
    # write command to a register
@@ -509,84 +498,84 @@ class CBerryTouch():
    # set PWM value for backlight -> 0 (0% PWM) - 255 (100% PWM)
    def RAIO_SetBacklightPWMValue( self,BL_value ):
       # Enable PWM1 output devider 256  
-      self.RAIO_SetRegister(self, self._P1CR, 0x88) 
+      self.RAIO_SetRegister( self._P1CR, 0x88) 
       # BL_vaue = 0 (0% PWM) - 255 (100% PWM)
-      self.RAIO_SetRegister(self, self._P1DCR, BL_value )
+      self.RAIO_SetRegister( self._P1DCR, BL_value )
 
    # set coordinates for active window
    # p1, p2: tupel(x,y)
    def Active_Window( self,p1, p2):
       # Set p1
-      self.RAIO_SetRegister( self,self._HSAW0, i16_split(p1[0],low) )
-      self.RAIO_SetRegister( self,self._HSAW1, i16_split(p1[0],high) )
-      self.RAIO_SetRegister( self,self._VEAW0, i16_split(p1[1],low) )
-      self.RAIO_SetRegister( self,self._VEAW1, i16_split(p1[1],high) )
+      self.RAIO_SetRegister( self._HSAW0, i16_split(p1[0],low) )
+      self.RAIO_SetRegister( self._HSAW1, i16_split(p1[0],high) )
+      self.RAIO_SetRegister( self._VEAW0, i16_split(p1[1],low) )
+      self.RAIO_SetRegister( self._VEAW1, i16_split(p1[1],high) )
       
       # Set p2
-      self.RAIO_SetRegister( self,self._HEAW0, i16_split(p2[0],low) )
-      self.RAIO_SetRegister( self,self._HEAW1, i16_split(p2[0],high) )
-      self.RAIO_SetRegister( self,self._VSAW0, i16_split(p2[1],low) )
-      self.RAIO_SetRegister( self,self._VSAW1, i16_split(p2[1],high) )
+      self.RAIO_SetRegister( self._HEAW0, i16_split(p2[0],low) )
+      self.RAIO_SetRegister( self._HEAW1, i16_split(p2[0],high) )
+      self.RAIO_SetRegister( self._VSAW0, i16_split(p2[1],low) )
+      self.RAIO_SetRegister( self._VSAW1, i16_split(p2[1],high) )
       
 
    # set cursor 
    # cur: tupel(x,y)
    def RAIO_set_cursor( self,cur ):
-      self.RAIO_SetRegister( self,self._CURH0, i16_split(cur[0],low) )
-      self.RAIO_SetRegister( self,self._CURH1, i16_split(cur[0],high) )
+      self.RAIO_SetRegister( self._CURH0, i16_split(cur[0],low) )
+      self.RAIO_SetRegister( self._CURH1, i16_split(cur[0],high) )
    
-      self.RAIO_SetRegister( self,self._CURV0, i16_split(cur[1],low) )
-      self.RAIO_SetRegister( self,self._CURV1, i16_split(cur[1],high) )
+      self.RAIO_SetRegister( self._CURV0, i16_split(cur[1],low) )
+      self.RAIO_SetRegister( self._CURV1, i16_split(cur[1],high) )
       
 
    # set mode for BET (Block Transfer Engine)
    def BTE_mode( self,bte_operation, rop_function ):
-      self.RAIO_SetRegister(self,self._BECR1, bte_operation | (rop_function<<4))
+      self.RAIO_SetRegister(self._BECR1, bte_operation | (rop_function<<4))
 
    # set color -> see color defines
    def Text_Background_Color( self,color ):
-      self.RAIO_SetRegister( self,self._TBCR, color )
+      self.RAIO_SetRegister( self._TBCR, color )
       
       
    def Text_Foreground_Color( color ):
-      self.RAIO_SetRegister( self,self._TFCR, color)
+      self.RAIO_SetRegister( self._TFCR, color)
 
 
    # clear memory
    def RAIO_clear_screen():
-      self.RAIO_SetRegister( self,self._MCLR , 0x81 ) 
-      self._wait_for_raio(self)
+      self.RAIO_SetRegister( self._MCLR , 0x81 ) 
+      self._wait_for_raio()
 
 
    # set coordinates for drawing
    # p1, p2: Tupel(x,y)
    def Set_Geometric_Coordinate(self, p1, p2 ):
       # P1, x
-      self.RAIO_SetRegister( self,self._DLHSR0, i16_split(p1[0],low) )
-      self.RAIO_SetRegister( self,self._DLHSR1, i16_split(p1[0],high) )
+      self.RAIO_SetRegister( self._DLHSR0, i16_split(p1[0],low) )
+      self.RAIO_SetRegister( self._DLHSR1, i16_split(p1[0],high) )
       # P1, y
-      self.RAIO_SetRegister( self,self._DLVSR0, i16_split(p1[1],low)  )
-      self.RAIO_SetRegister( self,self._DLVSR1, i16_split(p1[1],high) )
+      self.RAIO_SetRegister( self._DLVSR0, i16_split(p1[1],low)  )
+      self.RAIO_SetRegister( self._DLVSR1, i16_split(p1[1],high) )
 
       # P2, x
-      self.RAIO_SetRegister( self,self._DLHER0, i16_split(p2[0],low) )
-      self.RAIO_SetRegister( self,self._DLHER1, i16_split(p2[0],high) )
+      self.RAIO_SetRegister( self._DLHER0, i16_split(p2[0],low) )
+      self.RAIO_SetRegister( self._DLHER1, i16_split(p2[0],high) )
 
       # P2, y
-      self.RAIO_SetRegister( self,self._DLVER0, i16_split(p2[1],low) )
-      self.RAIO_SetRegister( self,self._DLVER1, i16_split(p2[1],high) )
+      self.RAIO_SetRegister( self._DLVER0, i16_split(p2[1],low) )
+      self.RAIO_SetRegister( self._DLVER1, i16_split(p2[1],high) )
 
    def Set_Geometric_Coordinate_circle ( p1, rad ):
       # P1, x
-      self.RAIO_SetRegister( self,self._DCHR0, i16_split(p1[0],low) )
-      self.RAIO_SetRegister( self,self._DCHR1, i16_split(p1[0],high) )
+      self.RAIO_SetRegister( self._DCHR0, i16_split(p1[0],low) )
+      self.RAIO_SetRegister( self._DCHR1, i16_split(p1[0],high) )
    
       # P1, y
-      self.RAIO_SetRegister( self,self._DCVR0, i16_split(p1[1],low) )
-      self.RAIO_SetRegister( self,self._DCVR1, i16_split(p1[1],high) )
+      self.RAIO_SetRegister( self._DCVR0, i16_split(p1[1],low) )
+      self.RAIO_SetRegister( self._DCVR1, i16_split(p1[1],high) )
       
       # rad
-      self.RAIO_SetRegister( self,self._DCRR, rad )
+      self.RAIO_SetRegister( self._DCRR, rad )
 
    # show the BMP picture on the TFT screen 
    def RAIO_Write_Picture( self,data, count ): # has to be checked how pointer works in python
@@ -596,58 +585,58 @@ class CBerryTouch():
    # set draw mode -> see DRAW_MODES
    def RAIO_StartDrawing(self,whattodraw ):
       if whattodraw == 'CIRCLE_NONFILL':
-          self.RAIO_SetRegister( self,self._DCR,  0x40 )
+          self.RAIO_SetRegister( self._DCR,  0x40 )
       elif whattodraw == 'CIRCLE_FILL':
-          self.RAIO_SetRegister( self,self._DCR,  0x60 )
+          self.RAIO_SetRegister( self._DCR,  0x60 )
       elif whattodraw == 'SQUARE_NONFILL':
-          self.RAIO_SetRegister( self,self._DCR,  0x90 )
+          self.RAIO_SetRegister( self._DCR,  0x90 )
       elif whattodraw == 'SQUARE_FILL':
-          self.RAIO_SetRegister( self,self._DCR,  0xB0 )
+          self.RAIO_SetRegister( self._DCR,  0xB0 )
       elif whattodraw == 'LINE':
-          self.RAIO_SetRegister( self,self._DCR,  0x80 )
+          self.RAIO_SetRegister( self._DCR,  0x80 )
 
    # draw some basic geometrical forms
    def Draw_Line( self,p1, p2 ):
-      self.Set_Geometric_Coordinate( self,p1, p2 )
-      self.RAIO_StartDrawing( self,'LINE' )
+      self.Set_Geometric_Coordinate( p1, p2 )
+      self.RAIO_StartDrawing( 'LINE' )
 
    def Draw_Square(self, p1, p2 ):
-      self.Set_Geometric_Coordinate( self,p1, p22 )
-      self.RAIO_StartDrawing(self, 'SQUARE_NONFILL' )
+      self.Set_Geometric_Coordinate(p1, p2 )
+      self.RAIO_StartDrawing( 'SQUARE_NONFILL' )
    
    def Draw_Circle( self,p1, rad ):
-      self.Set_Geometric_Coordinate_circle (self, p1, rad )
-      self.RAIO_StartDrawing( self,'CIRCLE_NONFILL' )
+      self.Set_Geometric_Coordinate_circle ( p1, rad )
+      self.RAIO_StartDrawing( 'CIRCLE_NONFILL' )
 
    # print text
    def RAIO_print_text(self,p1, text, BG_color, FG_color ):
       # set cursor
-      self.RAIO_set_cursor( self,p1 )
+      self.RAIO_set_cursor( p1 )
    
       # set color 
-      self.Text_Background_Color(self, BG_color )
-      self.Text_Foreground_Color(self, FG_color )
+      self.Text_Background_Color( BG_color )
+      self.Text_Foreground_Color( FG_color )
    
       # set text mode
-      self.RAIO_SetRegister( self,self._MWCR0, 0x80 )
+      self.RAIO_SetRegister( self._MWCR0, 0x80 )
    
       # write text to display
-      self._RegWrite( self,self._MRWC )
+      self._RegWrite( self._MRWC )
    
       for i in xrange(0,len(text)-1):
-         self._DataWrite( self,text[i] )
-         self._wait_for_raio(self)
+         self._DataWrite( text[i] )
+         self._wait_for_raio()
    
-      self._wait_for_raio(self)
+      self._wait_for_raio()
          
       # set graphic mode
-      self.RAIO_SetRegister( self,self._MWCR0, 0x00 )
+      self.RAIO_SetRegister( self._MWCR0, 0x00 )
 
 
    # set font size
    def RAIO_SetFontSizeFactor(self, size ):
       size = (size & 0x0f)
-      self.RAIO_SetRegister ( self,self._FNCR1, size )
+      self.RAIO_SetRegister ( self._FNCR1, size )
       
    def i16_split(value, byte):
       if value > 4095: 
@@ -668,51 +657,51 @@ class CBerryTouch():
    if _TOUCH_AVAILABLE == 1:     
    # get touch coordinates
       def RAIO_gettouch(self):
-         mask= self.RAIO_GetRegister( self,self._INTC )
+         mask= self.RAIO_GetRegister( self._INTC )
          touch = 0,0
    
          if mask & 0x04:
             # read the data for x and y
-            touch[0] = self.RAIO_GetRegister ( self,self._TPXH )
-            touch[1] = self.RAIO_GetRegister ( self,self._TPYH )
+            touch[0] = self.RAIO_GetRegister ( self._TPXH )
+            touch[1] = self.RAIO_GetRegister ( self._TPYH )
       
             # fill low pass filter with the new values
-            low_pass_x.append(touch[0])
-            low_pass_y.append(touch[1])
-            low_pass_pointer = low_pass_pointer + 1
+            self._low_pass_x[self._low_pass_pointer] = touch[0]
+            self._low_pass_y[self._low_pass_pointer] = touch[1]
+            self._low_pass_pointer = self._low_pass_pointer + 1
       
-            if low_pass_pointer == self._DEBOUNCE_BUFFER_SIZE:
-               low_pass_pointer = 0
-               touch_buffer_full = 1
+            if self._low_pass_pointer == self._DEBOUNCE_BUFFER_SIZE:
+               self._low_pass_pointer = 0
+               self._touch_buffer_full = 1
                
       
             # calculate the average
-            my_touch.touch[0] = (low_pass_x[0] + low_pass_x[1] + low_pass_x[2] + low_pass_x[3] ) >> 2
-            my_touch.touch[1] = (low_pass_y[0] + low_pass_y[1] + low_pass_y[2] + low_pass_y[3] ) >> 2
+            self.my_touch.touch[0] = (self._low_pass_x[0] + self._low_pass_x[1] + self._low_pass_x[2] + self._low_pass_x[3] ) >> 2
+            self.my_touch.touch[1] = (self._low_pass_y[0] + self._low_pass_y[1] + self._low_pass_y[2] + self._low_pass_y[3] ) >> 2
 
       
-            if (touch_buffer_full == 1):
-               if my_touch.state == 'down':
-                  my_touch.state= 'pressed'
-               elif my_touch.state == 'no_touch':
-                  my_touch.state = 'down'
+            if (self._touch_buffer_full == 1):
+               if self.my_touch.state == 'down':
+                  self.my_touch.state= 'pressed'
+               elif self.my_touch.state == 'no_touch':
+                  self.my_touch.state = 'down'
                else:
                   pass
       
             # clear touch irq
             mask = mask & 0xf4
-            self.RAIO_SetRegister( self,self._INTC, mask ) 
+            self.RAIO_SetRegister( self._INTC, mask ) 
    
             return  1
              
          else:
-            if my_touch.state == 'up':
-               my_touch.state = 'no_touch'
-            elif  my_touch.state == 'pressed':
-               my_touch.state = 'up'
+            if self.my_touch.state == 'up':
+               self.my_touch.state = 'no_touch'
+            elif  self.my_touch.state == 'pressed':
+               self.my_touch.state = 'up'
             else:
                pass
       
-            low_pass_pointer = 0
-            touch_buffer_full = 0
+            self._low_pass_pointer = 0
+            self._touch_buffer_full = 0
             return 0    
