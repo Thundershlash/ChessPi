@@ -422,7 +422,7 @@ class CBerryTouch():
  
       # horizontal settings
       # 0x27+1 * 8 = 320 pixel  
-      self.RAIO_SetRegister( self._HDWR , (self._DISPLAY_WIDTH / 8) - 1 )
+      self.RAIO_SetRegister( self._HDWR , int((self._DISPLAY_WIDTH / 8) - 1) )
       # Horizontal Non-Display Period Fine Tuning   
       self.RAIO_SetRegister( self._HNDFTR, 0x02 )
     
@@ -441,8 +441,8 @@ class CBerryTouch():
     
       # vertical settings    
       # 0x0EF +1 = 240 pixel
-      self.RAIO_SetRegister( self._VDHR0 , ( (self._DISPLAY_HEIGHT-1) & 0xFF ) ) 
-      self.RAIO_SetRegister( self._VDHR1 , ( (self._DISPLAY_HEIGHT-1) >> 8)    )
+      self.RAIO_SetRegister( self._VDHR0 ,int( (self._DISPLAY_HEIGHT-1) & 0xFF ) ) 
+      self.RAIO_SetRegister( self._VDHR1 , int( (self._DISPLAY_HEIGHT-1) >> 8)    )
     
       # VNDR0 , Vertical Non-Display Period Bit [7:0]
       # Vertical Non-Display area = (VNDR + 1)
@@ -458,7 +458,7 @@ class CBerryTouch():
       # miscellaneous settings 
     
       # active Window
-      self.Active_Window( 0, self._DISPLAY_WIDTH-1, 0, self._DISPLAY_HEIGHT-1 )     
+      self.Active_Window( (0, int(self._DISPLAY_WIDTH-1)),( 0, int(self._DISPLAY_HEIGHT-1)) )     
         
       # PCLK fetch data on rising edge 
       self.RAIO_SetRegister( self._PCLK, 0x00 )   
@@ -469,7 +469,7 @@ class CBerryTouch():
       # memory clear with background color
       self.Text_Background_Color( self._COLOR_WHITE )                
       self.RAIO_SetRegister( self._MCLR, 0x81 )     
-      self.TFT_wait_for_raio() 
+      self._wait_for_raio() 
   
       self.RAIO_SetRegister( self._IODR, 0x07 )    
       self.RAIO_SetRegister( self._PWRR, 0x80 )
@@ -488,11 +488,11 @@ class CBerryTouch():
 
          ################### hier gehts weiter
          # init touch structure
-         self.my_touch.state = no_touch
+         self.my_touch.state = 'no_touch'
    
          # init touch values
-         self.touch_buffer_full = 0
-         self.low_pass_pointer = 0       
+         self._touch_buffer_full = 0
+         self._low_pass_pointer = 0       
 
          
    # Read data from a register
@@ -517,26 +517,26 @@ class CBerryTouch():
    # p1, p2: tupel(x,y)
    def Active_Window( self,p1, p2):
       # Set p1
-      self.RAIO_SetRegister( self._HSAW0, i16_split(p1[0],low) )
-      self.RAIO_SetRegister( self._HSAW1, i16_split(p1[0],high) )
-      self.RAIO_SetRegister( self._VEAW0, i16_split(p1[1],low) )
-      self.RAIO_SetRegister( self._VEAW1, i16_split(p1[1],high) )
+      self.RAIO_SetRegister( self._HSAW0, self.i16_split(p1[0],'low') )
+      self.RAIO_SetRegister( self._HSAW1, self.i16_split(p1[0],'high') )
+      self.RAIO_SetRegister( self._VEAW0, self.i16_split(p1[1],'low') )
+      self.RAIO_SetRegister( self._VEAW1, self.i16_split(p1[1],'high') )
       
       # Set p2
-      self.RAIO_SetRegister( self._HEAW0, i16_split(p2[0],low) )
-      self.RAIO_SetRegister( self._HEAW1, i16_split(p2[0],high) )
-      self.RAIO_SetRegister( self._VSAW0, i16_split(p2[1],low) )
-      self.RAIO_SetRegister( self._VSAW1, i16_split(p2[1],high) )
+      self.RAIO_SetRegister( self._HEAW0, self.i16_split(p2[0],'low') )
+      self.RAIO_SetRegister( self._HEAW1, self.i16_split(p2[0],'high') )
+      self.RAIO_SetRegister( self._VSAW0, self.i16_split(p2[1],'low') )
+      self.RAIO_SetRegister( self._VSAW1, self.i16_split(p2[1],'high') )
       
 
    # set cursor 
    # cur: tupel(x,y)
    def RAIO_set_cursor( self,cur ):
-      self.RAIO_SetRegister( self._CURH0, i16_split(cur[0],low) )
-      self.RAIO_SetRegister( self._CURH1, i16_split(cur[0],high) )
+      self.RAIO_SetRegister( self._CURH0, self.i16_split(cur[0],'low') )
+      self.RAIO_SetRegister( self._CURH1, self.i16_split(cur[0],'high') )
    
-      self.RAIO_SetRegister( self._CURV0, i16_split(cur[1],low) )
-      self.RAIO_SetRegister( self._CURV1, i16_split(cur[1],high) )
+      self.RAIO_SetRegister( self._CURV0, self.i16_split(cur[1],'low') )
+      self.RAIO_SetRegister( self._CURV1, self.i16_split(cur[1],'high') )
       
 
    # set mode for BET (Block Transfer Engine)
@@ -649,7 +649,7 @@ class CBerryTouch():
       size = (size & 0x0f)
       self.RAIO_SetRegister ( self._FNCR1, size )
       
-   def i16_split(value, byte):
+   def i16_split(self,value, byte):
       if value > 4095: 
          high = int(hex(value)[:4],16)
          low = int('0x'+hex(value)[4:],16)
