@@ -272,7 +272,7 @@ class CBerryTouch():
       bcm2835_gpio_fsel( self._OE, BCM2835_GPIO_FSEL_OUTP )
       bcm2835_gpio_write( self._OE, HIGH )
    
-      bcm835_gpio_fsel( self._RAIO_RST, BCM2835_GPIO_FSEL_OUTP )
+      bcm2835_gpio_fsel( self._RAIO_RST, BCM2835_GPIO_FSEL_OUTP )
       bcm2835_gpio_write(self._RAIO_RST, HIGH )
 
       bcm2835_gpio_fsel( self._RAIO_CS, BCM2835_GPIO_FSEL_OUTP )
