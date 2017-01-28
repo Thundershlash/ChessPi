@@ -254,6 +254,7 @@ class CBerryTouch():
    
    def __init__(self):
       self._COM_init_board()
+      self.hard_reset()
       self._RAIO_init()
 
    # Initialization of Communication between RasPi and CBerry
@@ -313,9 +314,9 @@ class CBerryTouch():
    # hard reset of the graphic controller and the tft
    def hard_reset(self):
       bcm2835_gpio_write( self._RAIO_RST, LOW )
-      bcm2835_DelayMicroseconds( 10000 )
+      bcm2835_delayMicroseconds( 10000 )
       bcm2835_gpio_write( self._RAIO_RST, HIGH )
-      bcm2835_DelayMicroseconds( 1000 )
+      bcm2835_delayMicroseconds( 1000 )
        
    # wait during raio is busy
    def _wait_for_raio(self):
@@ -324,10 +325,15 @@ class CBerryTouch():
          
    # write data via SPI to tft
    def _SPI_data_out(self, data ):
-      self._tbuf = c_char_p(data)
-      self._rbuf = c_char_p(0)
-      bcm2835_spi_transfernb( self._tbuf, self._rbuf, 1 ) 
-      return rbuf[0]    
+      if data < 16:
+         self._tbuf.value = bytes.fromhex('0'+hex(data)[2:])
+      else:
+         self._tbuf.value = bytes.fromhex(hex(data)[2:])
+
+      print(repr(self._tbuf.raw))
+      self._rbuf.value = bytes.fromhex('00')
+      bcm2835_spi_transfernb( self._tbuf, self._rbuf, 2 ) 
+      return self._rbuf    
 
    # write byte to register
    def _RegWrite( self,reg ):
@@ -381,7 +387,8 @@ class CBerryTouch():
          PLL_Initial_Flag = 1                # set Flag to avoid repeated PLL init
       
          self.RAIO_SetRegister( self._PLLC1, 0x07 )     # set sys_clk 
-         bcm2835_DelayMicroseconds( 200 )
+         print("1")
+         bcm2835_delayMicroseconds( 200 )
          self.RAIO_SetRegister( self._PLLC2, 0x03 )     # set sys_clk 
          bcm2835_delayMicroseconds( 200 )
       
