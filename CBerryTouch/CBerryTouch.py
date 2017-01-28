@@ -238,7 +238,7 @@ class CBerryTouch():
       _low_pass_x = [0]
       _low_pass_y = [0]
       _low_pass_pointer = 0
-      _touch_buffer_full
+      _touch_buffer_full = 0
       
        # enumeration of touch modes    
       _TOUCH_FUNCTIONS = {'down','pressed','up','no_touch'} 
@@ -319,7 +319,7 @@ class CBerryTouch():
          pass
          
    # write data via SPI to tft
-   def _SPI_data_out( data ):
+   def _SPI_data_out(self, data ):
       tbuf[0] = hex(data)
       rbuf[0] = 0
       bcm2835_spi_transfernb( id(tbuf[0]), id(rbuf[0]), 1 ) 
