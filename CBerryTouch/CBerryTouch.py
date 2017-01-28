@@ -3,6 +3,7 @@
 
 
 from libbcm2835._bcm2835 import *
+from ctypes import *
 import time
 
 class CBerryTouch():
@@ -142,7 +143,7 @@ class CBerryTouch():
    _GCC0  = '0x84'
    _GCC1  = '0x85'
 
-   _PLLC1 = '0x88'
+   _PLLC1 = 0x88
    _PLLC2 = '0x89'
 
    _P1CR  = '0x8a'
@@ -232,8 +233,8 @@ class CBerryTouch():
    tc = 0x00, 0x00
    char_height = 15
    
-   _rbuf = ['0x00']
-   _tbuf = ['0x00']
+   _rbuf = create_string_buffer(1)
+   _tbuf = create_string_buffer(1)
    
    if _TOUCH_AVAILABLE == 1:   
       # definition of filter   size
@@ -323,11 +324,9 @@ class CBerryTouch():
          
    # write data via SPI to tft
    def _SPI_data_out(self, data ):
-      self._tbuf[0] = data
-      self._rbuf[0] = '0x00'
-      print(self._tbuf[0])
-      print(id(self._tbuf[0]))
-      bcm2835_spi_transfernb( id(self._tbuf[0]), id(self._rbuf[0]), 1 ) 
+      self._tbuf = c_char_p(data)
+      self._rbuf = c_char_p(0)
+      bcm2835_spi_transfernb( self._tbuf, self._rbuf, 1 ) 
       return rbuf[0]    
 
    # write byte to register
@@ -401,16 +400,16 @@ class CBerryTouch():
                                             # 8bit memory data bus
                                             # 16bpp 65K color
                                             # 16bit MCU-interface (data)
-            self.RAIO_SetRegister( self._DPCR, '0x00' )    # one layer   
+            self.RAIO_SetRegister( self._DPCR, 0x00 )    # one layer   
          elif _COLOR_MODE == 'CM_4K':
             # System Configuration Register
-            self.RAIO_SetRegister( self._SYSR, '0x06' )    # digital TFT
+            self.RAIO_SetRegister( self._SYSR, 0x06 )    # digital TFT
                                             # parallel data out
                                             # no external memory
                                             # 8bit memory data bus
                                             # 12bpp 4K color
                                             # 16bit MCU-interface (data)
-            self.RAIO_SetRegister( self._DPCR, '0x80' )    # two layers   
+            self.RAIO_SetRegister( self._DPCR, 0x80 )    # two layers   
             self.RAIO_SetRegister( self._MWCR1, self.BankNo_WR )
             self.RAIO_SetRegister( self._LTPR0, self.BankNo_RD )                      
  
@@ -418,19 +417,19 @@ class CBerryTouch():
       # 0x27+1 * 8 = 320 pixel  
       self.RAIO_SetRegister( self._HDWR , (self._DISPLAY_WIDTH / 8) - 1 )
       # Horizontal Non-Display Period Fine Tuning   
-      self.RAIO_SetRegister( self._HNDFTR, '0x02' )
+      self.RAIO_SetRegister( self._HNDFTR, 0x02 )
     
       # HNDR , Horizontal Non-Display Period Bit[4:0] 
       # Horizontal Non-Display Period (pixels) = (HNDR + 1)*8    
-      self.RAIO_SetRegister( self._HNDR, '0x03' )
+      self.RAIO_SetRegister( self._HNDR, 0x03 )
       # HSTR , HSYNC Start Position[4:0], HSYNC Start Position(PCLK) = (HSTR + 1)*8     0x02    
-      self.RAIO_SetRegister( self._HSTR, '0x04' )                                 
+      self.RAIO_SetRegister( self._HSTR, 0x04 )                                 
 
       # HPWR , HSYNC Polarity ,The period width of HSYNC. 
       # 1xxxxxxx activ high 0xxxxxxx activ low
       # HSYNC Width [4:0] HSYNC Pulse width
       # (PCLK) = (HPWR + 1)*8
-      self.RAIO_SetRegister( self._HPWR, '0x03' )
+      self.RAIO_SetRegister( self._HPWR, 0x03 )
     
     
       # vertical settings    
