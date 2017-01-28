@@ -306,15 +306,15 @@ class CBerryTouch():
       # set the SPI CS register to the some sensible defaults
       # paddr = bcm2835_spi0 + BCM2835_SPI0_CS/8
       # bcm2835_peri_write( paddr, 0 ) # All 0s
-    
+      
       # clear TX and RX fifos
       # bcm2835_peri_write_nb( paddr, BCM2835_SPI0_CS_CLEAR )
-      bcm2835_spi_begin() 
+      bcm2835_spi_begin()
       bcm2835_spi_setBitOrder( BCM2835_SPI_BIT_ORDER_MSBFIRST )      
       bcm2835_spi_setDataMode( BCM2835_SPI_MODE0 )                 
       bcm2835_spi_setClockDivider( BCM2835_SPI_CLOCK_DIVIDER_2 ) 
       bcm2835_spi_chipSelect( BCM2835_SPI_CS1 )                      
-      bcm2835_spi_setChipSelectPolarity( BCM2835_SPI_CS1, _LOW )
+      bcm2835_spi_setChipSelectPolarity( BCM2835_SPI_CS1, LOW )
 
 
    # hard reset of the graphic controller and the tft
@@ -381,15 +381,15 @@ class CBerryTouch():
    # Initialization of RAIO8870
    def _RAIO_init(self):
       PLL_Initial_Flag = 0
-    
+      print("RAIO Init")
       # PLL settings (System Clock)  
    
       if PLL_Initial_Flag == 0:           # wait until PLL is ready
          PLL_Initial_Flag = 1                # set Flag to avoid repeated PLL init
       
-         self.RAIO_SetRegister( self,self._PLLC1, 0x07 )     # set sys_clk 
+         self.RAIO_SetRegister( self._PLLC1, 0x07 )     # set sys_clk 
          bcm2835_DelayMicroseconds( 200 )
-         self.RAIO_SetRegister( self,self._PLLC2, 0x03 )     # set sys_clk 
+         self.RAIO_SetRegister( self._PLLC2, 0x03 )     # set sys_clk 
          bcm2835_delayMicroseconds( 200 )
       
          self.RAIO_SetRegister( self,self._PWRR, 0x01 )     # Raio software reset ( bit 0 ) set
@@ -503,8 +503,8 @@ class CBerryTouch():
 
    # write command to a register
    def RAIO_SetRegister( self,reg, value ):
-      _RegWrite(self,reg)
-      _DataWrite(self,value)
+      self._RegWrite(reg)
+      self._DataWrite(value)
 
    # set PWM value for backlight -> 0 (0% PWM) - 255 (100% PWM)
    def RAIO_SetBacklightPWMValue( self,BL_value ):
