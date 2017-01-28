@@ -232,6 +232,9 @@ class CBerryTouch():
    tc = 0x00, 0x00
    char_height = 15
    
+   _rbuf[0] = 0
+   _tbuf[0] = 0
+   
    if _TOUCH_AVAILABLE == 1:   
       # definition of filter   size
       _DEBOUNCE_BUFFER_SIZE = 4
@@ -320,9 +323,9 @@ class CBerryTouch():
          
    # write data via SPI to tft
    def _SPI_data_out(self, data ):
-      tbuf[0] = hex(data)
-      rbuf[0] = 0
-      bcm2835_spi_transfernb( id(tbuf[0]), id(rbuf[0]), 1 ) 
+      self._tbuf[0] = hex(data)
+      self._rbuf[0] = 0
+      bcm2835_spi_transfernb( id(self._tbuf[0]), id(self._rbuf[0]), 1 ) 
       return rbuf[0]    
 
    # write byte to register
