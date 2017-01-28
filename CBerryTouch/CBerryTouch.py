@@ -260,8 +260,8 @@ class CBerryTouch():
       my_touch = touch()
    
    def __init__(self):
-      _COM_init_board()
-      _RAIO_init()
+      self._COM_init_board()
+      self._RAIO_init()
 
    # Initialization of Communication between RasPi and CBerry
    def _COM_init_board(self):
